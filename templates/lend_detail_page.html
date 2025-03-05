@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block body %}
+<div class="form-row">
+    <div class="container mt-5">
+        {% if lend_detail %}
+        <table class="table table-dark table-striped mt-3">
+            <h2 class="text-light">貸した金額一覧</h2>
+            <thead>
+                <tr>
+                    <th>名前</th>
+                    <th>
+                        金額
+                        <span data-toggle="tooltip" title="今までの貸したお金全ての履歴です。">
+                            <i class="bi bi-info-circle"></i>
+                        </span>
+                    </th>
+                    <th>
+                        科目
+                        <span data-toggle="tooltip" title="どんな内容で貸したのかが確認できます。">
+                            <i class="bi bi-info-circle"></i>
+                        </span>
+                    </th>
+                    <th>日付</th>
+                    <th>削除</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for view in lend_detail %}
+                <tr>
+                    <td>{{ view.first_name }} {{ view.last_name }}</td>
+                    <td class="number-format">{{ view.amount }}</td>
+                    <td class="number-format">{{ view.type }}</td>
+                    <td><time>{{ view.created_at.strftime('%Y/%m/%d') }}</td>
+                    <td>
+                        <form method="post" action="/lend/deleat" size="2">
+                            <input type="hidden" name="lend_id" value="{{ view.lend_id }}">
+                            <input type="submit" value="消去" class="btn btn-danger">
+                        </form>
+                    </td>
+                {% endfor %}
+            </tbody>
+        </table>
+        {{ pagination.links }}
+        {% else %}
+        <h3>この人にお金を貸していません</h3>
+        {% endif %}
+    </div>
+
+    <div class="container mt-5">
+        {% if view_info %}
+        <table class="table table-dark table-striped mt-3">
+            <h2 class="text-light">返してもらった金額一覧</h2>
+            <thead>
+                <tr>
+                    <th>名前</th>
+                    <th>
+                        金額
+                        <span data-toggle="tooltip" title="今までの借りたお金全ての履歴です。">
+                            <i class="bi bi-info-circle"></i>
+                        </span>
+                    </th>
+                    <th>
+                        科目
+                        <span data-toggle="tooltip" title="どんな内容で借りたのかが確認できます。">
+                            <i class="bi bi-info-circle"></i>
+                        </span>
+                    </th>
+                    <th>日付</th>
+                    <th>削除</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for view in view_info %}
+                <tr>
+                    <td>{{ view.first_name }} {{ view.last_name }}</td>
+                    <td class="number-format">{{ view.amount }}</td>
+                    <td class="number-format">{{ view.type }}</td>
+                    <td><time>{{ view.created_at.strftime('%Y/%m/%d') }}</time></td>
+                    <td>
+                        <form method="post" action="/deleat/returned" size="2">
+                            <input type="hidden" name="returned_id" value="{{ view.returned_id }}">
+                            <input type="hidden" name="party_id" value="{{ view.party_id }}">
+                            <input type="submit" value="消去" class="btn btn-danger">
+                        </form>
+                    </td>
+                {% endfor %}
+            </tbody>
+        </table>
+        {{ pagination.links }}
+        {% else %}
+        <h3>この人にお金を返されていません</h3>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

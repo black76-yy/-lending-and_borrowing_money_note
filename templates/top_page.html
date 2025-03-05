@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block body %}
+<div class="container">
+    <button class="btn btn-primary mb-3" type="button" data-toggle="collapse" data-target="#lendBorrowForm" aria-expanded="false" aria-controls="lendBorrowForm">
+        貸借入力フォームを表示/非表示
+    </button>
+    <div class="collapse" id="lendBorrowForm">
+    <fieldset class="bg-dark text-light p-3">
+        <legend>貸借入力フォーム</legend>
+        <form method="post" action="/toppage" size="2" onsubmit="return validateLendForm()">
+            <div class="form-group">
+                <label for="party_id">相手ユーザーの選択</label>
+                <select name="party_id" class="form-control">
+                    {% for party in party_list %}
+                    <option value="{{party.party_id}}">{{party.first_name}} {{party.last_name}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="amount">金額</label>
+                <input type="number" min="0" name="amount" class="form-control" required oninput="formatNumber(this)">
+            </div>
+            <div class="form-group">
+                <label for="type_select">今まで作成した科目</label>
+                <select name="type_select" id="lend_type_select" class="form-control">
+                    <option value="">選択してください</option>
+                    {% for type in type_list %}
+                    <option value="{{type}}">{{type}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="type_input">新しい科目</label>
+                <input type="text" name="type_input" id="lemd_type_input" class="form-control">
+            </div>
+            <div class="form-group">
+                <input type="radio" id="lend" name="lend_or_borrow" value="lend">
+                <label for="lend">貸した</label>
+                <input type="radio" id="borrow" name="lend_or_borrow" value="borrow" checked>
+                <label for="borrow">借りた</label>
+            </div>
+            <input type="submit" value="追加" class="btn btn-primary">
+        </form>
+    </fieldset>
+    </div>
+</div>
+<a href="{{url_for('party_page')}}" class="text-light"><h4>相手ユーザー追加はこちら！</h4></a>
+
+
+{% if views %}
+<table class="table table-dark table-striped mt-3">
+    <h2 class="text-light">貸借一覧</h2>
+    <thead>
+        <tr>
+            <th>名前</th>
+            <th>
+                金額
+                <span data-toggle="tooltip" title="現在自分が相手に「返してもらう」or「返す」金額が表示されます">
+                    <i class="bi bi-info-circle"></i>
+                </span>
+            </th>
+            <th>
+                種別
+                <span data-toggle="tooltip" title="表示されている金額が、相手に「返してもらう金額」なのか、「返す金額」なのかを表示します。">
+                    <i class="bi bi-info-circle"></i>
+                </span>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for view in views %}
+        <tr>
+            <td>{{ view.first_name }} {{ view.last_name}}</td>
+            {% if view.money is not none and view.money <= 0 %}
+            <td class="number-format">{{ view.money | abs }}</td>
+            <td style="color: green;">返してもらう</td>
+            {% elif view.money is not none and view.money >= 0 %}
+            <td class="number-format">{{ view.money }}</td>
+            <td style="color: red;">返す</td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{{ pagination.links }}
+{% else %}
+<h3>お金の貸し借りはありません</h3>
+{% endif %}
+<div class="form-row">
+    <div class="form-container">
+        <button class="btn btn-primary mb-3" type="button" data-toggle="collapse" data-target="#returnedForm" aria-expanded="false" aria-controls="returnedForm">
+            返還入力フォームを表示/非表示
+        </button>
+        <div class="collapse" id="returnedForm">
+        <fieldset class="bg-dark text-light p-3">
+            <legend>返還入力フォーム</legend>
+            <form method="post" action="/update/returned" size="2" onsubmit="return validateReturnedForm()">
+                <div class="form-group">
+                    <label for="party_id">相手ユーザーの選択</label>
+                    <select name="party_id" class="form-control">
+                        {% for party in party_list %}
+                        <option value="{{party.party_id}}">{{party.first_name}} {{party.last_name}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="returned_money">金額</label>
+                    <input type="number" min="0" name="returned_money" class="form-control" required oninput="formatNumber(this)">
+                </div>
+                <div class="form-group">
+                    <label for="type_select">今まで作成した科目</label>
+                    <select name="type_select" id="returned_type_select" class="form-control">
+                        <option value="">選択してください</option>
+                        {% for type in type_list %}
+                        <option value="{{type}}">{{type}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="type_input">新しい科目</label>
+                    <input type="text" name="type_input" id="returned_type_input" class="form-control">
+                </div>
+                <input type="submit" value="返してもらった！" class="btn btn-primary">
+            </form>
+        </fieldset>
+        </div>
+    </div>
+
+    <div class="form-container">
+        <button class="btn btn-primary mb-3" type="button" data-toggle="collapse" data-target="#returnForm" aria-expanded="false" aria-controls="returnForm">
+            返却入力フォームを表示/非表示
+        </button>
+        <div class="collapse" id="returnForm">
+        <fieldset class="bg-dark text-light p-3">
+            <legend>返却入力フォーム</legend>
+            <form method="post" action="/update/return" size="2" onsubmit="return validateReturnForm()">
+                <div class="form-group">
+                    <label for="party_id">相手ユーザーの選択</label>
+                    <select name="party_id" class="form-control">
+                        {% for party in party_list %}
+                        <option value="{{party.party_id}}">{{party.first_name}} {{party.last_name}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="return_money">金額</label>
+                    <input type="number" min="0" name="return_money" class="form-control" required oninput="formatNumber(this)">
+                </div>
+                <div class="form-group">
+                    <label for="type_select">今まで作成した科目</label>
+                    <select name="type_select" id="retrun_type_select" class="form-control">
+                        <option value="">選択してください</option>
+                        {% for type in type_list %}
+                        <option value="{{type}}">{{type}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="type_input">新しい科目</label>
+                    <input type="text" name="type_input" id="return_type_input" class="form-control">
+                </div>
+                <input type="submit" value="返した！" class="btn btn-primary">
+            </form>
+        </fieldset>
+        </div>
+    </div>
+</div>
+
+<script>
+function validateLendForm() {
+    var typeSelect = document.getElementById('lend_type_select').value;
+    var typeInput = document.getElementById('lend_type_input').value;
+
+    if ((typeSelect === '' && typeInput === '') || (typeSelect !== '' && typeInput !== '')) {
+        alert('既存の科目から選択するか、新しい科目を入力してください。ただし、両方同時に入力することはできません。');
+        return false;
+    }
+    return true;
+}
+
+function validateReturnForm() {
+    var typeSelect = document.getElementById('return_type_select').value;
+    var typeInput = document.getElementById('return_type_input').value;
+
+    if ((typeSelect === '' && typeInput === '') || (typeSelect !== '' && typeInput !== '')) {
+        alert('既存の科目から選択するか、新しい科目を入力してください。ただし、両方同時に入力することはできません。');
+        return false;
+    }
+    return true;
+}
+
+function validateReturnedForm() {
+    var typeSelect = document.getElementById('returned_type_select').value;
+    var typeInput = document.getElementById('returned_type_input').value;
+
+    if ((typeSelect === '' && typeInput === '') || (typeSelect !== '' && typeInput !== '')) {
+        alert('既存の科目から選択するか、新しい科目を入力してください。ただし、両方同時に入力することはできません。');
+        return false;
+    }
+    return true;
+}
+
+function formatNumber(input) {
+    var value = input.value;
+    value = value.replace(/[^0-9]/g, '');
+    input.value = value;
+}
+</script>   
+{% endblock %}

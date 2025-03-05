@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block body %}
+{% if user %}
+    <h1 class="text-light">こんにちわ, {{ user.name }}!</h1>
+    <img src="{{ user.picture }}" alt="Profile Picture" class="img-thumbnail">
+    <br>
+    <a href="/logout" class="btn btn-dark">ログアウト</a>
+{% else %}
+    <h1 class="text-light">貸し借りノートへようこそ！</h1>
+    <a href="/login" class="btn btn-dark">Googleでログイン</a>
+{% endif %}
+{% endblock %}

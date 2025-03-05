@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+
+{% block body %}
+<div class="container">
+    <button class="btn btn-primary mb-3" type="button" data-toggle="collapse" data-target="#lendBorrowForm" aria-expanded="false" aria-controls="lendBorrowForm">
+        相手ユーザー追加フォームを表示/非表示
+    </button>
+    <div class="collapse" id="lendBorrowForm">
+    <fieldset class="bg-dark text-light p-3">
+        <legend>相手ユーザーフォーム</legend>
+        <form method="post" action="/add/party" size="2">
+            <div class="form-group">
+                <label for="first_name">名前(苗字)</label>
+                <input type="text" name="first_name" class="form-control" required="入力必須">
+            </div>
+            <div class="form-group">
+                <label for="last_name">名前</label>
+                <input type="text" name="last_name" class="form-control" required="入力必須">
+            </div>
+            <div class="form-group">
+                <label for="relation">関係性</label>
+                <small class="form-text text-white">例えば・・・「親」「友達」</small>
+                <input type="text" name="relation" class="form-control" required="入力必須">
+            </div>
+            <input type="submit" value="追加" class="btn btn-primary">
+        </form>
+    </fieldset>
+    </div>
+</div>
+{% if party_list %}
+<table class="table table-dark table-striped mt-3">
+    <thead>
+        <tr>
+            <th>名前(苗字)</th>
+            <th>名前</th>
+            <th>関係性</th>
+            <th>削除</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for party in party_list %}
+        <tr>
+            <td>{{ party.first_name }}</td>
+            <td>{{ party.last_name }}</td>
+            <td>{{ party.relation }}</td>
+            <td>
+                <form method="post" action="/party/deleat" size="2">
+                    <input type="hidden" name="party_id" value="{{ party.party_id }}">
+                    <input type="submit" value="ユーザー消去" class="btn btn-danger">
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{{ pagination.links }}
+{% else %}
+<h3>相手ユーザーが存在しません</h3>
+{% endif %}
+{% endblock %}
